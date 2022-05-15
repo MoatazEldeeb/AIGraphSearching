@@ -61,9 +61,12 @@ class Canvas(FigureCanvas):
 class FinalPage(QWidget):
     def __init__(self,G,Algorithm,color_map,start,goals, maximumDepth):
         super().__init__()
-        self.resize(1600, 800)
+        self.resize(1700, 900)
         self.chart = Canvas(self,G,color_map)
         self.chart.setGeometry(50,50,1500,700)
+        self.visitedOut = QtWidgets.QLabel(self)
+        self.visitedOut.setGeometry(800,800,100,50)
+
         self.Algorithm = Algorithm
         self.start = start
         self.goals= goals.split(",")
@@ -290,7 +293,7 @@ class FinalPage(QWidget):
                 path.append(u)
                 # visited = v
             print("visited: ",visited)
-            
+
             for i in range(len(path)):
                 for n in self.G.nodes:
                     split = n.split(' ')
@@ -413,6 +416,9 @@ class FinalPage(QWidget):
             self.chart.ColorPath(self.G,goalPath)
             self.chart.draw_idle()
 
+        listToStr = ' '.join([str(elem) for elem in visited])
+        self.visitedOut.setText("Visited Nodes: " +listToStr)
+
 
 
 class GoalPage(QWidget):
@@ -429,10 +435,15 @@ class GoalPage(QWidget):
             nodes.append(n.split(" ")[0])
         if self.startState.text() in nodes and self.goalState.text() in nodes:
             cMap=self.chart.updateGraph(self.startState.text(),self.goalState.text())
-            if self.maximumDepth.text():
+            if self.maximumDepth.text().isdigit():
                 self.finalPage = FinalPage(self.chart.G ,self.selectAlgorithm.currentText(),cMap,self.startState.text(),self.goalState.text(),self.maximumDepth.text())
-            else: self.finalPage = FinalPage(self.chart.G ,self.selectAlgorithm.currentText(),cMap,self.startState.text(),self.goalState.text(),0)
-            self.finalPage.show()
+                self.finalPage.show()
+            else: 
+                if self.selectAlgorithm.currentText()== "Iterative Deepening":
+                    self.error.setText("Maximum depth is required and must be integer")
+                else: 
+                    self.finalPage = FinalPage(self.chart.G ,self.selectAlgorithm.currentText(),cMap,self.startState.text(),self.goalState.text(),0)
+                    self.finalPage.show()
         else:
             self.error.setText("Start node and/or goal node not found")
 
