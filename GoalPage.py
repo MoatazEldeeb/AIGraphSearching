@@ -85,7 +85,7 @@ class FinalPage(QWidget):
                 continue
             visited.append(node)
             if node in goal:
-                return path
+                return path,visited
             else:
                 adjacent_nodes = graph.get(node,[])
                 for node2 in adjacent_nodes:
@@ -103,13 +103,14 @@ class FinalPage(QWidget):
                 continue
             visited.append(node)
             if node in goal:
-                return path
+                return path, visited
             else:
                 adjacent_nodes = graph.get(node,[])
                 for node2 in adjacent_nodes:
                     new_path = path.copy()
                     new_path.append(node2)
                     stack.append(new_path)
+
     def path_cost(self,path):
         total_cost=0
         for (node,cost)in path:
@@ -128,7 +129,7 @@ class FinalPage(QWidget):
                 continue
             visited.append(node)
             if node in goal:
-                return path
+                return path, visited
             else:
                 adjacent_nodes=graph.get(node,[])
                 for (node2,cost) in adjacent_nodes:
@@ -156,8 +157,8 @@ class FinalPage(QWidget):
             curList = []
             (found , goalPath) =self.DFS(currentNode,destination,graph,i,curList)
             if found:
-                return True, goalPath
-        return False, goalPath
+                return True, goalPath,curList
+        return False, goalPath, curList
 
     def path_f_cost(self,path):
         g_cost = 0
@@ -180,13 +181,14 @@ class FinalPage(QWidget):
                 continue
             visited.append(node)
             if node in goal:
-                return path
+                return path, visited
             else:
                 adjacent_nodes = graph.get(node,[])
                 for (node2, cost) in adjacent_nodes:
                     new_path = path.copy()
                     new_path.append((node2,cost))
                     queue.append(new_path)
+
     def path_h_cost(self,path):
         g_cost = 0
         for (node,cost) in path:
@@ -208,7 +210,7 @@ class FinalPage(QWidget):
                 continue
             visited.append(node)
             if node in goal:
-                return path
+                return path, visited
             else:
                 adjacent_nodes = graph.get(node,[])
                 for (node2, cost) in adjacent_nodes:
@@ -228,7 +230,9 @@ class FinalPage(QWidget):
                     edgeList.append(to[0])
                 graph[node.split(" ")[0]] = edgeList
 
-            path=self.bfs(graph,self.start,self.goals)
+            path, visited=self.bfs(graph,self.start,self.goals)
+            print("visited: ", visited)
+
             for i in range(len(path)):
                 for n in self.G.nodes:
                     split = n.split(' ')
@@ -250,7 +254,9 @@ class FinalPage(QWidget):
                     edgeList.append(to[0])
                 graph[node.split(" ")[0]] = edgeList
 
-            path = self.dfs(graph,self.start,self.goals)
+            path, visited = self.dfs(graph,self.start,self.goals)
+            print("visited: ", visited)
+
             for i in range(len(path)):
                 for n in self.G.nodes:
                     split = n.split(' ')
@@ -261,21 +267,37 @@ class FinalPage(QWidget):
             self.chart.draw_idle()
         
         elif self.Algorithm == 'Uniform Cost':
-            graph = {k:[] for k in self.G.nodes}
+            graph = {k.split(' ')[0] :[] for k in self.G.nodes}
             # if indirected
             if self.G.is_directed():
                 for u,v,c in self.G.edges.data('weight'):
+                    u = u.split(" ")[0]
+                    v = v.split(" ")[0]
                     graph[u].append((v,int(c)))
             else:
                 for u,v,c in self.G.edges.data('weight'):
+                    u = u.split(" ")[0]
+                    v = v.split(" ")[0]
                     graph[u].append((v,int(c)))
                     graph[v].append((u,int(c)))
 
             print('my graph is')
             print(graph)
             path = []
-            for u,v in self.ucs(graph,self.start,self.goals):
+            visited =[]
+            p , visited = self.ucs(graph,self.start,self.goals)
+            for u,v in p:
                 path.append(u)
+                # visited = v
+            print("visited: ",visited)
+            
+            for i in range(len(path)):
+                for n in self.G.nodes:
+                    split = n.split(' ')
+                    if(path[i]== split[0]) :
+                        path[i] = n
+                        continue
+
             self.chart.ColorPath(self.G,path)
             self.chart.draw_idle()
         
@@ -301,16 +323,17 @@ class FinalPage(QWidget):
             print(graph)
 
             self.H_table = {}
-
-            self.H_table = {}
             for u,v in self.G.nodes.data('heuristic'):
                 u = u.split(" ")
                 self.H_table[u[0]]=int(v)
 
             print(self.H_table)
             path = []
-            for u,v in self.a_star_search(graph,self.start,self.goals):
+            p , visited = self.a_star_search(graph,self.start,self.goals)
+            for u,v in p:
                 path.append(u)
+            
+            print("visited: ",visited)
             for i in range(len(path)):
                 for n in self.G.nodes:
                     split = n.split(' ')
@@ -343,16 +366,19 @@ class FinalPage(QWidget):
             print(graph)
 
             self.H_table = {}
-
-            self.H_table = {}
             for u,v in self.G.nodes.data('heuristic'):
                 u = u.split(" ")
                 self.H_table[u[0]]=int(v)
 
             print(self.H_table)
             path = []
-            for u,v in self.Greedy_Search(graph,self.start,self.goals):
+            
+            p , visited = self.Greedy_Search(graph,self.start,self.goals)
+            for u,v in p:
                 path.append(u)
+            
+
+            print("visited: ",visited)
             for i in range(len(path)):
                 for n in self.G.nodes:
                     split = n.split(' ')
@@ -374,7 +400,8 @@ class FinalPage(QWidget):
                     edgeList.append(to[0])
                 graph[node.split(" ")[0]] = edgeList
 
-            (found , goalPath) = self.iterativeDDFS(self.start,self.goals,graph,self.maximumDepth)
+            (found , goalPath, visited) = self.iterativeDDFS(self.start,self.goals,graph,self.maximumDepth)
+            print("visited: ", visited)
 
             for i in range(len(goalPath)):
                 for n in self.G.nodes:
