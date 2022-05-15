@@ -11,10 +11,16 @@ class firstWindow(QWidget):
         self.initUI()
 
     def dir(self):
+        if self.heuristic.isChecked():
+            self.cost.setChecked(True)
         self.dWindow = directedGraphWindow(self.cost.isChecked(),self.heuristic.isChecked())
         self.dWindow.show()
     
     def indir(self):
+        
+        if self.heuristic.isChecked():
+            self.cost.setChecked(True)
+
         self.iWindow = inDirectedGraphWindow(self.cost.isChecked(),self.heuristic.isChecked())
         self.iWindow.show()
 

@@ -82,7 +82,9 @@ class inDirectedGraphWindow(QWidget):
     def AddEdge(self):
         if self.edgeFrom.text() and self.edgeTo.text():
             if self.withCost:
-                self.chart.updateGraph(self.edgeFrom.text(),self.edgeTo.text(),self.incost.text())
+                if self.incost.text().isdigit():
+                    self.chart.updateGraph(self.edgeFrom.text(),self.edgeTo.text(),self.incost.text())
+                else: self.error.setText("Cost must be integer")
             else:
                 self.chart.updateGraph(self.edgeFrom.text(),self.edgeTo.text(),0)
             self.chart.draw_idle()
@@ -93,12 +95,14 @@ class inDirectedGraphWindow(QWidget):
     def AddHeuristic(self):
         self.addEdge.setEnabled(False)
         if self.inHeuristic.text() and self.nodeName.text():
-            res=self.chart.AddHeuristicInNode(self.nodeName.text(),self.inHeuristic.text())
-            self.chart.draw_idle()
+            if self.inHeuristic.text().isdigit():
+                res=self.chart.AddHeuristicInNode(self.nodeName.text(),self.inHeuristic.text())
+                self.chart.draw_idle()
 
-            if(res==0):
-                self.error.setText("Node not found")
-            else: self.error.setText("")
+                if(res==0):
+                    self.error.setText("Node not found")
+                else: self.error.setText("")
+            else: self.error.setText("Heuristic must be an integer")
         else:
             self.error.setText("Node Name and Heuristic is required")
 
@@ -170,6 +174,7 @@ class inDirectedGraphWindow(QWidget):
 
         
         self.error = QtWidgets.QLabel(self)
+        self.error.setStyleSheet("color: red;")
         self.error.setGeometry(1200, 750, 400, 50)
     
 

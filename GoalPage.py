@@ -250,7 +250,7 @@ class FinalPage(QWidget):
                     edgeList.append(to[0])
                 graph[node.split(" ")[0]] = edgeList
 
-            path=self.dfs(nx.to_dict_of_lists(self.G),self.start,self.goals)
+            path = self.dfs(graph,self.start,self.goals)
             for i in range(len(path)):
                 for n in self.G.nodes:
                     split = n.split(' ')
@@ -397,9 +397,17 @@ class GoalPage(QWidget):
         self.initUI()
 
     def RunAlgorithm(self):
-        cMap=self.chart.updateGraph(self.startState.text(),self.goalState.text())
-        self.finalPage = FinalPage(self.chart.G ,self.selectAlgorithm.currentText(),cMap,self.startState.text(),self.goalState.text(),self.maximumDepth.text())
-        self.finalPage.show()
+        nodes = []
+        for n in self.chart.G.nodes():
+            nodes.append(n.split(" ")[0])
+        if self.startState.text() in nodes and self.goalState.text() in nodes:
+            cMap=self.chart.updateGraph(self.startState.text(),self.goalState.text())
+            if self.maximumDepth.text():
+                self.finalPage = FinalPage(self.chart.G ,self.selectAlgorithm.currentText(),cMap,self.startState.text(),self.goalState.text(),self.maximumDepth.text())
+            else: self.finalPage = FinalPage(self.chart.G ,self.selectAlgorithm.currentText(),cMap,self.startState.text(),self.goalState.text(),0)
+            self.finalPage.show()
+        else:
+            self.error.setText("Start node and/or goal node not found")
 
     def initUI(self):
         self.label = QtWidgets.QLabel(self)
@@ -436,9 +444,8 @@ class GoalPage(QWidget):
         self.runAlgorithm.setText("Run Algorithm")
         self.runAlgorithm.clicked.connect(self.RunAlgorithm)
 
+        self.error = QtWidgets.QLabel(self)
+        self.error.setStyleSheet("color: red;")
+        self.error.setGeometry(1200, 550, 400, 50)
+
         
-
-
-
-
-
